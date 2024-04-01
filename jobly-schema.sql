@@ -20,7 +20,7 @@ CREATE TABLE jobs (
   id SERIAL PRIMARY KEY,
   title TEXT NOT NULL,
   salary INTEGER CHECK (salary >= 0),
-  equity NUMERIC CHECK (equity <= 1.0),
+  equity NUMERIC CHECK (equity >= 0.0 AND equity <= 1.0),
   company_handle VARCHAR(25) NOT NULL
     REFERENCES companies ON DELETE CASCADE
 );
