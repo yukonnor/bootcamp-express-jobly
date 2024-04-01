@@ -1,6 +1,6 @@
 const { BadRequestError } = require("../expressError");
 
-/** returns sql syntax for partial record updates used in Model classes.
+/** sqlForPartialUpdate returns sql syntax for partial record updates used in Model classes.
  *
  *  Accepts:
  *  - dataToUpdate: An object with the columns to be updated along with what the new values should be.
@@ -35,4 +35,45 @@ function sqlForPartialUpdate(dataToUpdate, jsToSql) {
     };
 }
 
-module.exports = { sqlForPartialUpdate };
+/** sqlForVariableWhere returns sql syntax for a variable amount of filters to add to a WHERE statement.
+ *
+ *  This function includes some hard coded logic based on specific columns in our data model.
+ *
+ *  Accepts:
+ *  - filters: An object with the columns to be filtered along with their filter values.
+ *     eg: {name, minEmployees}
+ *
+ *  Returns:
+ *  - A string to be appended to the WHERE statement in a SQL query.
+ *   eg: "name ILIKE '%net%' AND num_employees >= 10"
+ *
+ *  Throws a BadRequestError if no data is provided or if an unsupported filter is provided.
+ *
+ */
+
+function sqlForVariableWhere(filters) {
+    const keys = Object.keys(filters);
+    if (keys.length === 0) throw new BadRequestError("No data");
+
+    const filterConditions = {
+        name: (value) => `"name" ILIKE '%${value}%'`,
+        minEmployees: (value) => `"num_employees" >= ${value}`,
+        maxEmployees: (value) => `"num_employees" <= ${value}`,
+    };
+
+    let whereStatements = [];
+    for (let filter in filters) {
+        if (filter in filterConditions) {
+            const condition = filterConditions[filter](filters[filter]);
+            whereStatements.push(condition);
+        } else {
+            throw new BadRequestError("Unsupported filter");
+        }
+    }
+
+    const whereStatement = whereStatements.join(" AND ");
+
+    return whereStatement;
+}
+
+module.exports = { sqlForPartialUpdate, sqlForVariableWhere };
