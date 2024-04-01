@@ -44,9 +44,30 @@ function ensureLoggedIn(req, res, next) {
 /** Require admin user to access route or raise 401 */
 
 function ensureAdmin(req, res, next) {
-    console.log("res.locals: ", res.locals);
     try {
         if (!res.locals.user || !res.locals.user.isAdmin) throw new UnauthorizedError();
+        return next();
+    } catch (err) {
+        return next(err);
+    }
+}
+// end
+
+/** Require admin user or same user request is referring to access route or raise 401 */
+
+function ensureAdminOrSameUser(req, res, next) {
+    try {
+        // get username of the route from the request params
+        const username = req.params.username;
+
+        // if not logged in, throw error
+        if (!res.locals.user) throw new UnauthorizedError();
+
+        // if not admin and not same user, throw error
+        if (!res.locals.user.isAdmin && res.locals.user.username !== username)
+            throw new UnauthorizedError();
+
+        // if admin or same user, go to next handler.
         return next();
     } catch (err) {
         return next(err);
@@ -58,4 +79,5 @@ module.exports = {
     authenticateJWT,
     ensureLoggedIn,
     ensureAdmin,
+    ensureAdminOrSameUser,
 };
