@@ -59,6 +59,9 @@ function sqlForVariableWhere(filters) {
         name: (value) => `"name" ILIKE '%${value}%'`,
         minEmployees: (value) => `"num_employees" >= ${value}`,
         maxEmployees: (value) => `"num_employees" <= ${value}`,
+        title: (value) => `"title" <= '%${value}%'`,
+        minSalary: (value) => `"salary" >= ${value}`,
+        hasEquity: (value) => (value ? `"equity" > 0` : `"equity" >= 0`),
     };
 
     let whereStatements = [];
