@@ -8,7 +8,7 @@ const express = require("express");
 const { BadRequestError, ExpressError } = require("../expressError");
 const { ensureAdmin } = require("../middleware/auth");
 const Job = require("../models/job");
-const { objectIsValid } = require("../helpers/validation");
+const { objectIsValid, convertStringToBool } = require("../helpers/validation");
 
 // const companyNewSchema = require("../schemas/companyNew.json");
 // const companyUpdateSchema = require("../schemas/companyUpdate.json");
@@ -70,6 +70,11 @@ router.get("/", async function (req, res, next) {
                 "Please provide one of these attributes to filter companies: 'title', 'minSalary', 'hasEquity'.",
                 400
             );
+        }
+
+        // convert the hasEquity filter (comes in as string) to a boolean
+        if (filters.hasEquity) {
+            filters.hasEquity = convertStringToBool(filters.hasEquity);
         }
 
         // if valid filters provided, return a filtered set of jobs

@@ -1,4 +1,4 @@
-const { BadRequestError } = require("../expressError");
+const { BadRequestError, ExpressError } = require("../expressError");
 
 /** returns true or false based on whether the the object only contains keys that are defined in the allowedAttr list.
  *  obj: An object with key/value pairs.
@@ -11,4 +11,20 @@ function objectIsValid(obj, allowedAttr) {
     return Object.keys(obj).every((key) => allowedAttr.includes(key));
 }
 
-module.exports = { objectIsValid };
+function convertStringToBool(string) {
+    let value;
+    if (string === "true") {
+        value = true;
+    } else if (string === "false") {
+        value = false;
+    } else {
+        // If the string doesn't represent a valid boolean value, handle it accordingly
+        throw new ExpressError(
+            "Please provide either 'true' or 'false' for the 'hasEquity' filter.",
+            400
+        );
+    }
+    return value;
+}
+
+module.exports = { objectIsValid, convertStringToBool };

@@ -67,6 +67,10 @@ function sqlForVariableWhere(filters) {
     let whereStatements = [];
     for (let filter in filters) {
         if (filter in filterConditions) {
+            console.log("filter:", filter);
+            console.log("filters[filter]:", filters[filter]);
+            console.log("Boolean(filters[filter]):", Boolean(filters[filter]));
+            console.log(typeof Boolean(filters[filter]));
             const condition = filterConditions[filter](filters[filter]);
             whereStatements.push(condition);
         } else {
@@ -76,6 +80,9 @@ function sqlForVariableWhere(filters) {
 
     // will be empty string "" if no filters provided.
     const whereStatement = "WHERE ".concat(whereStatements.join(" AND "));
+
+    console.log("Equity value: ", filters.hasEquity);
+    console.log("Where statement ", whereStatement);
 
     return whereStatement;
 }
