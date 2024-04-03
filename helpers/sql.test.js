@@ -53,17 +53,28 @@ describe("sqlForPartialUpdate tests", function () {
 });
 
 describe("sqlForVariableWhere tests", function () {
-    const dataToFilter = {
-        name: "NewCo",
-        minEmployees: 10,
-        maxEmployees: 100,
-    };
+    test("works for company filters", function () {
+        const dataToFilter = {
+            name: "NewCo",
+            minEmployees: 10,
+            maxEmployees: 100,
+        };
 
-    test("works", function () {
         const result = sqlForVariableWhere(dataToFilter);
         expect(result).toEqual(
             `"name" ILIKE '%NewCo%' AND "num_employees" >= 10 AND "num_employees" <= 100`
         );
+    });
+
+    test("works for job filters", function () {
+        const dataToFilter = {
+            title: "manager",
+            minSalary: 50000,
+            hasEquity: false,
+        };
+
+        const result = sqlForVariableWhere(dataToFilter);
+        expect(result).toEqual(`"title" ILIKE '%manager%' AND "salary" >= 50000 AND "equity" >= 0`);
     });
 
     test("throws BadRequestError if no filters", function () {
