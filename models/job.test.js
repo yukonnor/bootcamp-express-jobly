@@ -38,23 +38,37 @@ describe("create", function () {
         // add id property to newJob
         newJob["id"] = job.id;
 
-        expect(job).toEqual(newJob);
+        expect(job).toEqual({
+            id: expect.any(Number),
+            companyHandle: "c1",
+            title: "Title",
+            salary: 50000,
+            equity: "0.111",
+        });
 
         const result = await db.query(
-            `SELECT id, company_handle as companyHandle, title, salary, equity
+            `SELECT id, company_handle as "companyHandle", title, salary, equity
              FROM jobs
              WHERE id = $1`,
             [job.id]
         );
-        expect(result.rows).toEqual([newJob]);
+        expect(result.rows).toEqual([
+            {
+                id: expect.any(Number),
+                companyHandle: "c1",
+                title: "Title",
+                salary: 50000,
+                equity: "0.111",
+            },
+        ]);
     });
 
-    test("bad request with dupe", async function () {
+    test("bad request with bad company handle", async function () {
         try {
-            await Job.create(newJob);
-            await Job.create(newJob);
+            const badJob = { companyHandle: "asdf", title: "Title", salary: 50000, equity: 0.111 };
+            await Job.create(badJob);
             // If no error is thrown, fail the test
-            fail();
+            expect(false).toBeTruthy();
         } catch (err) {
             expect(err instanceof BadRequestError).toBeTruthy();
         }
@@ -72,14 +86,14 @@ describe("findAll", function () {
                 companyHandle: "c1",
                 title: "T1",
                 salary: 10000,
-                equity: 0.2,
+                equity: "0.2",
             },
             {
                 id: expect.any(Number),
                 companyHandle: "c2",
                 title: "T2",
                 salary: 20000,
-                equity: 0,
+                equity: "0",
             },
         ]);
     });
@@ -97,20 +111,20 @@ describe("findSome", function () {
                 companyHandle: "c1",
                 title: "T1",
                 salary: 10000,
-                equity: 0.2,
+                equity: "0.2",
             },
             {
                 id: expect.any(Number),
                 companyHandle: "c2",
                 title: "T2",
                 salary: 20000,
-                equity: 0,
+                equity: "0",
             },
         ]);
     });
 
     test("works: salary and equity filters provided", async function () {
-        const filters = { minSalary: 15000, equity: false };
+        const filters = { minSalary: 15000, hasEquity: false };
         let jobs = await Job.findSome(filters);
         expect(jobs).toEqual([
             {
@@ -118,7 +132,7 @@ describe("findSome", function () {
                 companyHandle: "c2",
                 title: "T2",
                 salary: 20000,
-                equity: 0,
+                equity: "0",
             },
         ]);
     });
@@ -129,10 +143,17 @@ describe("findSome", function () {
         expect(jobs).toEqual([
             {
                 id: expect.any(Number),
+                companyHandle: "c1",
+                title: "T1",
+                salary: 10000,
+                equity: "0.2",
+            },
+            {
+                id: expect.any(Number),
                 companyHandle: "c2",
                 title: "T2",
                 salary: 20000,
-                equity: 0,
+                equity: "0",
             },
         ]);
     });
@@ -145,14 +166,14 @@ describe("findSome", function () {
                 companyHandle: "c1",
                 title: "T1",
                 salary: 10000,
-                equity: 0.2,
+                equity: "0.2",
             },
             {
                 id: expect.any(Number),
                 companyHandle: "c2",
                 title: "T2",
                 salary: 20000,
-                equity: 0,
+                equity: "0",
             },
         ]);
     });
@@ -181,7 +202,7 @@ describe("get", function () {
             },
             title: "T1",
             salary: 10000,
-            equity: 0.2,
+            equity: "0.2",
         });
     });
 
@@ -204,14 +225,18 @@ describe("update", function () {
         const id = await getJobId("c1");
         let job = await Job.update(id, updateData);
 
+        console.log("job from test:", job);
+
         expect(job).toEqual({
             id: id,
             companyHandle: "c1",
-            ...updateData,
+            title: "New Title",
+            salary: 30000,
+            equity: "0.25",
         });
 
         const result = await db.query(
-            `SELECT id, company_handle, title, salary, equity
+            `SELECT id, company_handle as "companyHandle", title, salary, equity
              FROM jobs
              WHERE id = $1`,
             [id]
@@ -220,7 +245,9 @@ describe("update", function () {
             {
                 id: id,
                 companyHandle: "c1",
-                ...updateData,
+                title: "New Title",
+                salary: 30000,
+                equity: "0.25",
             },
         ]);
     });

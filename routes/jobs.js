@@ -65,9 +65,9 @@ router.get("/", async function (req, res, next) {
         }
 
         // if invalid filters provided, throw error
-        if (!objectIsValid(filters, ["title", "minSalary", "equity"])) {
+        if (!objectIsValid(filters, ["title", "minSalary", "hasEquity"])) {
             throw new ExpressError(
-                "Please provide one of these attributes to filter companies: 'title', 'minSalary', 'equity'.",
+                "Please provide one of these attributes to filter companies: 'title', 'minSalary', 'hasEquity'.",
                 400
             );
         }

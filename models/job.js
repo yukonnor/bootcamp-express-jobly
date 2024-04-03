@@ -16,12 +16,22 @@ class Job {
      * */
 
     static async create({ companyHandle, title, salary, equity }) {
+        const handleCheck = await db.query(
+            `SELECT handle
+           FROM companies
+           WHERE handle = $1`,
+            [companyHandle]
+        );
+
+        if (!handleCheck.rows[0])
+            throw new BadRequestError(`Company handle doesn't exist: ${companyHandle}`);
+
         // TODO: make salary and equity optional to create job.
         const result = await db.query(
             `INSERT INTO jobs
            (company_handle, title, salary, equity)
            VALUES ($1, $2, $3, $4)
-           RETURNING id, company_handle as "companyHandle", title, salary, equity::numeric`,
+           RETURNING id, company_handle as "companyHandle", title, salary, equity`,
             [companyHandle, title, salary, equity]
         );
         const job = result.rows[0];
@@ -40,7 +50,7 @@ class Job {
                     company_handle as "companyHandle",
                     title,
                     salary,
-                    equity::numeric
+                    equity
            FROM jobs
            ORDER BY id`
         );
@@ -64,11 +74,12 @@ class Job {
                     company_handle as "companyHandle",
                     title,
                     salary,
-                    equity::numeric
+                    equity
            FROM jobs
            ${whereStatement}
            ORDER BY id`
         );
+
         return jobsResults.rows;
     }
 
@@ -85,7 +96,7 @@ class Job {
             `SELECT j.id, 
                     j.title, 
                     j.salary, 
-                    j.equity::numeric, 
+                    j.equity, 
                     json_build_object(
                      'handle', c.handle,
                      'name', c.name,
@@ -95,8 +106,6 @@ class Job {
              WHERE j.id = $1`,
             [id]
         );
-
-        console.log("jobResults.rows[0]", jobResults.rows[0]);
 
         const job = jobResults.rows[0];
 
@@ -128,9 +137,11 @@ class Job {
                                 company_handle AS "companyHandle", 
                                 title, 
                                 salary, 
-                                equity::numeric`;
+                                equity`;
         const result = await db.query(querySql, [...values, id]);
         const job = result.rows[0];
+
+        console.log("job from model:", job);
 
         if (!job) throw new NotFoundError(`No job: ${id}`);
 
