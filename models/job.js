@@ -21,7 +21,7 @@ class Job {
             `INSERT INTO jobs
            (company_handle, title, salary, equity)
            VALUES ($1, $2, $3, $4)
-           RETURNING id, company_handle as "companyHandle", title, salary, equity`,
+           RETURNING id, company_handle as "companyHandle", title, salary, equity::numeric`,
             [companyHandle, title, salary, equity]
         );
         const job = result.rows[0];
@@ -40,8 +40,8 @@ class Job {
                     company_handle as "companyHandle",
                     title,
                     salary,
-                    equity
-           FROM companies
+                    equity::numeric
+           FROM jobs
            ORDER BY id`
         );
         return jobsResults.rows;
@@ -64,9 +64,9 @@ class Job {
                     company_handle as "companyHandle",
                     title,
                     salary,
-                    equity
+                    equity::numeric
            FROM jobs
-           WHERE ${whereStatement}
+           ${whereStatement}
            ORDER BY id`
         );
         return jobsResults.rows;
@@ -85,7 +85,7 @@ class Job {
             `SELECT j.id, 
                     j.title, 
                     j.salary, 
-                    j.equity, 
+                    j.equity::numeric, 
                     json_build_object(
                      'handle', c.handle,
                      'name', c.name,
@@ -95,6 +95,8 @@ class Job {
              WHERE j.id = $1`,
             [id]
         );
+
+        console.log("jobResults.rows[0]", jobResults.rows[0]);
 
         const job = jobResults.rows[0];
 
@@ -116,7 +118,7 @@ class Job {
      */
 
     static async update(id, data) {
-        const { setCols, values } = sqlForPartialUpdate(data);
+        const { setCols, values } = sqlForPartialUpdate(data, {});
         const handleVarIdx = "$" + (values.length + 1);
 
         const querySql = `UPDATE jobs 
@@ -126,8 +128,8 @@ class Job {
                                 company_handle AS "companyHandle", 
                                 title, 
                                 salary, 
-                                equity`;
-        const result = await db.query(querySql, [...values, handle]);
+                                equity::numeric`;
+        const result = await db.query(querySql, [...values, id]);
         const job = result.rows[0];
 
         if (!job) throw new NotFoundError(`No job: ${id}`);

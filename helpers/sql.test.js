@@ -62,7 +62,7 @@ describe("sqlForVariableWhere tests", function () {
 
         const result = sqlForVariableWhere(dataToFilter);
         expect(result).toEqual(
-            `"name" ILIKE '%NewCo%' AND "num_employees" >= 10 AND "num_employees" <= 100`
+            `WHERE "name" ILIKE '%NewCo%' AND "num_employees" >= 10 AND "num_employees" <= 100`
         );
     });
 
@@ -74,18 +74,21 @@ describe("sqlForVariableWhere tests", function () {
         };
 
         const result = sqlForVariableWhere(dataToFilter);
-        expect(result).toEqual(`"title" ILIKE '%manager%' AND "salary" >= 50000 AND "equity" >= 0`);
+        expect(result).toEqual(
+            `WHERE "title" ILIKE '%manager%' AND "salary" >= 50000 AND "equity" >= 0`
+        );
     });
 
-    test("throws BadRequestError if no filters", function () {
+    test("returns empty string if no filters", function () {
         const noFilters = {};
-        try {
-            const result = sqlForVariableWhere(noFilters);
-            // If no error is thrown, fail the test
-            expect(true).toBe(false);
-        } catch (err) {
-            expect(err instanceof BadRequestError).toBeTruthy();
-        }
+
+        const result = sqlForVariableWhere(noFilters);
+        expect(result).toEqual("");
+    });
+
+    test("returns empty string if no argument provided", function () {
+        const result = sqlForVariableWhere();
+        expect(result).toEqual("");
     });
 
     test("throws BadRequestError if unsupported filters", function () {
@@ -93,7 +96,7 @@ describe("sqlForVariableWhere tests", function () {
         try {
             const result = sqlForVariableWhere(badFilters);
             // If no error is thrown, fail the test
-            expect(true).toBe(false);
+            fail();
         } catch (err) {
             expect(err instanceof BadRequestError).toBeTruthy();
             expect(err.message).toBe("Unsupported filter");

@@ -52,8 +52,8 @@ function sqlForPartialUpdate(dataToUpdate, jsToSql) {
  */
 
 function sqlForVariableWhere(filters) {
-    const keys = Object.keys(filters);
-    if (keys.length === 0) throw new BadRequestError("No data");
+    // if filters not provided, return empty string
+    if (!filters || Object.keys(filters).length === 0) return "";
 
     const filterConditions = {
         name: (value) => `"name" ILIKE '%${value}%'`,
@@ -74,7 +74,8 @@ function sqlForVariableWhere(filters) {
         }
     }
 
-    const whereStatement = whereStatements.join(" AND ");
+    // will be empty string "" if no filters provided.
+    const whereStatement = "WHERE ".concat(whereStatements.join(" AND "));
 
     return whereStatement;
 }

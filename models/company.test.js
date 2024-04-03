@@ -133,14 +133,31 @@ describe("findSome", function () {
         ]);
     });
 
-    test("fails: no filter provided", async function () {
-        try {
-            let companies = await Company.findSome();
-            // If no error is thrown, fail the test
-            expect(true).toBe(false);
-        } catch (err) {
-            expect(err instanceof TypeError).toBeTruthy();
-        }
+    test("works: no filter provided", async function () {
+        let companies = await Company.findSome();
+        expect(companies).toEqual([
+            {
+                handle: "c1",
+                name: "C1",
+                description: "Desc1",
+                numEmployees: 1,
+                logoUrl: "http://c1.img",
+            },
+            {
+                handle: "c2",
+                name: "C2",
+                description: "Desc2",
+                numEmployees: 2,
+                logoUrl: "http://c2.img",
+            },
+            {
+                handle: "c3",
+                name: "C3",
+                description: "Desc3",
+                numEmployees: 3,
+                logoUrl: "http://c3.img",
+            },
+        ]);
     });
 });
 
