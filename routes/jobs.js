@@ -136,7 +136,7 @@ router.patch("/:id", ensureAdmin, async function (req, res, next) {
 router.delete("/:id", ensureAdmin, async function (req, res, next) {
     try {
         await Job.remove(req.params.id);
-        return res.json({ deleted: req.params.id });
+        return res.json({ deleted: Number(req.params.id) });
     } catch (err) {
         return next(err);
     }
