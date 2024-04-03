@@ -67,8 +67,7 @@ describe("create", function () {
         try {
             const badJob = { companyHandle: "asdf", title: "Title", salary: 50000, equity: 0.111 };
             await Job.create(badJob);
-            // If no error is thrown, fail the test
-            expect(false).toBeTruthy();
+            fail();
         } catch (err) {
             expect(err instanceof BadRequestError).toBeTruthy();
         }

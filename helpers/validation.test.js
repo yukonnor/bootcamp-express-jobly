@@ -1,6 +1,7 @@
 "use strict";
 
-const { objectIsValid } = require("./validation");
+const { ExpressError } = require("../expressError");
+const { objectIsValid, convertStringToBool } = require("./validation");
 
 describe("objectIsValid tests", function () {
     const objToTest = {
@@ -34,5 +35,25 @@ describe("objectIsValid tests", function () {
         objToTest["new"] = "test";
         const result = objectIsValid(objToTest, allowedAttr);
         expect(result).toBeFalsey;
+    });
+});
+
+describe("convertStringToBool tests", function () {
+    test("works: true", function () {
+        const result = convertStringToBool("true");
+        expect(result).toBe(true);
+    });
+
+    test("works: false", function () {
+        const result = convertStringToBool("false");
+        expect(result).toBe(false);
+    });
+
+    test("throws error if invalid string provided", function () {
+        try {
+            const result = convertStringToBool("asdfasdf");
+        } catch (err) {
+            expect(err instanceof ExpressError).toBeTruthy();
+        }
     });
 });
