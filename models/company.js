@@ -90,20 +90,36 @@ class Company {
      **/
 
     static async get(handle) {
+        console.log("IN GET...HANDLE:", handle);
+
+        // Use json functions to built JSON object or show []
         const companyRes = await db.query(
             `SELECT handle,
                   name,
                   description,
                   num_employees AS "numEmployees",
-                  logo_url AS "logoUrl"
-           FROM companies
-           WHERE handle = $1`,
+                  logo_url AS "logoUrl",
+                  json_agg(
+                    json_build_object(
+                        'id', j.id,
+                        'title', j.title,
+                        'salary', j.salary,
+                        'equity', j.equity
+                    )
+                  ) AS jobs
+           FROM companies c
+           LEFT JOIN jobs j ON c.handle = j.company_handle
+           WHERE c.handle = $1
+           GROUP BY 1,2,3,4`,
             [handle]
         );
 
         const company = companyRes.rows[0];
 
         if (!company) throw new NotFoundError(`No company: ${handle}`);
+
+        // if no jobs, show empty list
+        company.jobs = company.jobs[0].id === null ? [] : company.jobs;
 
         return company;
     }

@@ -164,7 +164,7 @@ describe("findSome", function () {
 /************************************** get */
 
 describe("get", function () {
-    test("works", async function () {
+    test("works for company with job", async function () {
         let company = await Company.get("c1");
         expect(company).toEqual({
             handle: "c1",
@@ -172,6 +172,37 @@ describe("get", function () {
             description: "Desc1",
             numEmployees: 1,
             logoUrl: "http://c1.img",
+            jobs: [
+                {
+                    id: expect.any(Number),
+                    title: expect.any(String),
+                    salary: expect.any(Number),
+                    equity: expect.any(Number),
+                },
+            ],
+        });
+    });
+
+    test("works for company without jobs", async function () {
+        const newCompany = {
+            handle: "new",
+            name: "New",
+            description: "New Description",
+            numEmployees: 1,
+            logoUrl: "http://new.img",
+        };
+
+        let newCompanyResult = await Company.create(newCompany);
+
+        console.log("newCompanyResult:", newCompanyResult);
+
+        let company = await Company.get(newCompany.handle);
+
+        console.log("company:", company);
+
+        expect(company).toEqual({
+            ...newCompany,
+            jobs: [],
         });
     });
 
@@ -180,6 +211,7 @@ describe("get", function () {
             await Company.get("nope");
             fail();
         } catch (err) {
+            console.error(err);
             expect(err instanceof NotFoundError).toBeTruthy();
         }
     });
