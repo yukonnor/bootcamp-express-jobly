@@ -42,9 +42,10 @@ router.post("/", ensureAdmin, async function (req, res, next) {
     }
 });
 
-/** GET / => { users: [ {username, firstName, lastName, email }, ... ] }
+/** GET / => { users: [ {username, firstName, lastName, email, jobs }, ... ] }
  *
- * Returns list of all users.
+ * Returns list of all users: { users: [ {username, firstName, lastName, email, jobs }, ... ] }
+ * Where jobs is a list of all jobs the user hass applied to: jobs: [ jobId, jobId, ... ]
  *
  * Authorization required: admin
  **/
@@ -60,7 +61,8 @@ router.get("/", ensureAdmin, async function (req, res, next) {
 
 /** GET /[username] => { user }
  *
- * Returns { username, firstName, lastName, isAdmin }
+ * Returns { username, firstName, lastName, isAdmin, jobs }
+ * Where jobs is a list of all jobs the user hass applied to: jobs: [ jobId, jobId, ... ]
  *
  * Authorization required: admin or same user
  **/
@@ -127,7 +129,7 @@ router.post("/:username/jobs/:id", ensureAdminOrSameUser, async function (req, r
     console.log("IN JOB APP ROUTE....");
     try {
         const applied = await User.createJobApplication(req.params.username, req.params.id);
-        return res.json(applied);
+        return res.status(201).json(applied);
     } catch (err) {
         return next(err);
     }

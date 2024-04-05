@@ -14,7 +14,7 @@ const {
     adminToken,
 } = require("./_testCommon");
 
-/* Helper function to get a job object first test job */
+/* Helper function to get the job object of the first test job  */
 async function getJob() {
     const jobsResponse = await request(app).get("/jobs");
     const job = jobsResponse.body.jobs[0];

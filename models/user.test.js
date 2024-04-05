@@ -283,7 +283,7 @@ describe("create job application", function () {
 
     test("not found if no such job", async function () {
         try {
-            let application = await User.createJobApplication("u1", 9999);
+            let application = await User.createJobApplication("u1", 0);
             fail();
         } catch (err) {
             expect(err instanceof NotFoundError).toBeTruthy();

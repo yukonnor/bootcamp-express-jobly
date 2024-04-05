@@ -98,18 +98,26 @@ class User {
 
     /** Find all users.
      *
-     * Returns [{ username, first_name, last_name, email, is_admin }, ...]
+     * Returns [{ username, first_name, last_name, email, is_admin, jobs }, ...]
+     * Where jobs is a list of all jobs the user hass applied to: jobs: [ jobId, jobId, ... ]
+     *
      **/
 
     static async findAll() {
         const result = await db.query(
-            `SELECT username,
-                  first_name AS "firstName",
-                  last_name AS "lastName",
-                  email,
-                  is_admin AS "isAdmin"
-           FROM users
-           ORDER BY username`
+            `SELECT u.username,
+                    u.first_name AS "firstName",
+                    u.last_name AS "lastName",
+                    u.email,
+                    u.is_admin AS "isAdmin",
+                    CASE 
+                        WHEN jsonb_agg(a.job_id) = '[null]' THEN '[]' 
+                        ELSE jsonb_agg(a.job_id) 
+                    END AS jobs
+            FROM users u
+            LEFT JOIN applications a ON u.username = a.username
+            GROUP BY 1,2,3,4,5
+            ORDER BY username`
         );
 
         return result.rows;
@@ -118,24 +126,33 @@ class User {
     /** Given a username, return data about user.
      *
      * Returns { username, first_name, last_name, is_admin, jobs }
-     *   where jobs is { id, title, company_handle, company_name, state }
+     * Where jobs is a list of all jobs the user hass applied to: jobs: [ jobId, jobId, ... ]
      *
      * Throws NotFoundError if user not found.
      **/
 
     static async get(username) {
         const userRes = await db.query(
-            `SELECT username,
-                  first_name AS "firstName",
-                  last_name AS "lastName",
-                  email,
-                  is_admin AS "isAdmin"
-           FROM users
-           WHERE username = $1`,
+            `SELECT u.username,
+                    u.first_name AS "firstName",
+                    u.last_name AS "lastName",
+                    u.email,
+                    u.is_admin AS "isAdmin",
+                    CASE 
+                        WHEN jsonb_agg(a.job_id) = '[null]' THEN '[]' 
+                        ELSE jsonb_agg(a.job_id) 
+                    END AS jobs
+            FROM users u
+            LEFT JOIN applications a ON u.username = a.username
+            WHERE u.username = $1
+            GROUP BY 1,2,3,4,5
+            ORDER BY username`,
             [username]
         );
 
         const user = userRes.rows[0];
+
+        console.log(user);
 
         if (!user) throw new NotFoundError(`No user: ${username}`);
 
