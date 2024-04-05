@@ -141,8 +141,6 @@ class Job {
         const result = await db.query(querySql, [...values, id]);
         const job = result.rows[0];
 
-        console.log("job from model:", job);
-
         if (!job) throw new NotFoundError(`No job: ${id}`);
 
         return job;

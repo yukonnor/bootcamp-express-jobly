@@ -90,8 +90,6 @@ class Company {
      **/
 
     static async get(handle) {
-        console.log("IN GET...HANDLE:", handle);
-
         // Use json functions to built JSON object or show []
         const companyRes = await db.query(
             `SELECT handle,

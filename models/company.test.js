@@ -192,13 +192,9 @@ describe("get", function () {
             logoUrl: "http://new.img",
         };
 
-        let newCompanyResult = await Company.create(newCompany);
-
-        console.log("newCompanyResult:", newCompanyResult);
+        await Company.create(newCompany);
 
         let company = await Company.get(newCompany.handle);
-
-        console.log("company:", company);
 
         expect(company).toEqual({
             ...newCompany,
@@ -211,7 +207,6 @@ describe("get", function () {
             await Company.get("nope");
             fail();
         } catch (err) {
-            console.error(err);
             expect(err instanceof NotFoundError).toBeTruthy();
         }
     });
