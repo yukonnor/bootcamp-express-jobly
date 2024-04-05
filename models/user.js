@@ -154,13 +154,13 @@ class User {
      *
      * Throws NotFoundError if not found.
      *
-     * WARNING: this function can set a new password.Callers of this function
+     * WARNING: this function can set a new password. Callers of this function
      * must be certain they have validated inputs to this or a serious security
      * risks are opened.
      *
-     * NOTE: this route that calls this method does not currently allow updates
+     * NOTE: this route that *currently* calls this method does not allow updates
      * to isAdmin. To handle in future, create a admin-only route that supports
-     * making using admins / removing admin status.
+     * making using admins / removing admin status and call this method.
      */
 
     static async update(username, data) {
@@ -226,14 +226,14 @@ class User {
         ]);
 
         if (userCheck.rows.length === 0) {
-            throw new BadRequestError(`User ${username} does not exist.`);
+            throw new NotFoundError(`User ${username} does not exist.`);
         }
 
         // Check if the job_id exists
         const jobCheck = await db.query(`SELECT id FROM jobs WHERE id = $1`, [jobId]);
 
         if (jobCheck.rows.length === 0) {
-            throw new BadRequestError(`Job with ID ${jobId} does not exist.`);
+            throw new NotFoundError(`Job with ID ${jobId} does not exist.`);
         }
 
         try {
