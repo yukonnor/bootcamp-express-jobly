@@ -152,8 +152,6 @@ class User {
 
         const user = userRes.rows[0];
 
-        console.log(user);
-
         if (!user) throw new NotFoundError(`No user: ${username}`);
 
         return user;
@@ -262,7 +260,6 @@ class User {
             );
 
             const applied = applicationRes.rows[0];
-            console.log("applied:", applied);
             return applied;
         } catch (err) {
             // throw error with more helpful message for duplicate application

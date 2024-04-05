@@ -174,8 +174,6 @@ describe("GET /jobs", function () {
         const filters = { hasEquity: false };
         const resp = await request(app).get("/jobs").query(filters);
 
-        console.log("equity resp.body", resp.body);
-
         expect(resp.body).toEqual({
             jobs: [
                 {
@@ -199,8 +197,6 @@ describe("GET /jobs", function () {
     test("works: all filters provided", async function () {
         const filters = { title: "t", minSalary: 10001, hasEquity: false };
         const resp = await request(app).get("/jobs").query(filters);
-
-        console.log("all resp.body", resp.body);
 
         expect(resp.body).toEqual({
             jobs: [

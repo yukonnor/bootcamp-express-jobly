@@ -126,7 +126,6 @@ router.delete("/:username", ensureAdminOrSameUser, async function (req, res, nex
  **/
 
 router.post("/:username/jobs/:id", ensureAdminOrSameUser, async function (req, res, next) {
-    console.log("IN JOB APP ROUTE....");
     try {
         const applied = await User.createJobApplication(req.params.username, req.params.id);
         return res.status(201).json(applied);

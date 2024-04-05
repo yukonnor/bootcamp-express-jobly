@@ -58,18 +58,20 @@ async function commonBeforeAll() {
         password: "password3",
         isAdmin: false,
     });
-    await Job.create({
+    const job1 = await Job.create({
         companyHandle: "c1",
         title: "T1",
         salary: 10000,
         equity: 0.2,
     });
-    await Job.create({
-        companyHandle: "c2",
+    const job2 = await Job.create({
+        companyHandle: "c1",
         title: "T2",
         salary: 20000,
         equity: 0,
     });
+    await User.createJobApplication("u1", job1.id);
+    await User.createJobApplication("u1", job2.id);
 }
 
 async function commonBeforeEach() {

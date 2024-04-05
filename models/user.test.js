@@ -10,6 +10,29 @@ const {
     commonAfterAll,
 } = require("./_testCommon");
 
+/* Helper functions to get job ids */
+async function getJobId() {
+    const jobsResponse = await db.query(`
+          SELECT id
+          FROM   jobs
+          WHERE  company_handle = 'c1'
+          AND    title = 'T1'`);
+    const job = jobsResponse.rows[0];
+
+    return job.id;
+}
+
+async function newJobId() {
+    const jobsResponse = await db.query(`
+          INSERT INTO jobs(company_handle, title, salary, equity)
+          VALUES ('c1', 'New Title', 10000, 0.2)
+          RETURNING id`);
+
+    const job = jobsResponse.rows[0];
+
+    return job.id;
+}
+
 beforeAll(commonBeforeAll);
 beforeEach(commonBeforeEach);
 afterEach(commonAfterEach);
@@ -260,12 +283,7 @@ describe("remove", function () {
 describe("create job application", function () {
     test("works", async function () {
         // get job id of new job
-        const job = await db.query(`
-          INSERT INTO jobs(company_handle, title, salary, equity)
-          VALUES ('c1', 'T3', 10000, 0.2)
-          RETURNING id`);
-        const jobId = job.rows[0].id;
-
+        const jobId = await newJobId();
         let application = await User.createJobApplication("u1", jobId);
         expect(application).toEqual({
             applied: jobId,
@@ -273,13 +291,12 @@ describe("create job application", function () {
     });
 
     test("fails: application already exists", async function () {
-        // get job id
-        const job = await db.query("SELECT id FROM jobs WHERE title='T1'");
-        const jobId = job.rows[0].id;
+        // get existing job id
+        const jobId = await getJobId();
 
         try {
+            // u1 already applied to this job in commonTest
             let applicationOne = await User.createJobApplication("u1", jobId);
-            let applicationTwo = await User.createJobApplication("u1", jobId);
             fail();
         } catch (err) {
             expect(err instanceof BadRequestError).toBeTruthy();
@@ -288,9 +305,7 @@ describe("create job application", function () {
 
     test("not found if no such user", async function () {
         // get job id
-        const job = await db.query("SELECT id FROM jobs WHERE title='T1'");
-        const jobId = job.rows[0].id;
-
+        const jobId = await newJobId();
         try {
             let application = await User.createJobApplication("badUserName", jobId);
             fail();

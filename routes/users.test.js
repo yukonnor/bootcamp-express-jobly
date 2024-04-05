@@ -16,12 +16,30 @@ const {
     adminToken,
 } = require("./_testCommon");
 
-/* Helper function to get the job object of the first test job  */
-async function getJob() {
+/* Helper functions to get job ids */
+async function getJobId() {
     const jobsResponse = await request(app).get("/jobs");
     const job = jobsResponse.body.jobs[0];
 
-    return job;
+    return job.id;
+}
+
+async function newJobId() {
+    const newJob = {
+        companyHandle: "c1",
+        title: "New Title",
+        salary: 15000,
+        equity: 0.111,
+    };
+
+    const jobsResponse = await request(app)
+        .post("/jobs")
+        .send(newJob)
+        .set("authorization", `Bearer ${adminToken}`);
+
+    const jobId = jobsResponse.body.job.id;
+
+    return jobId;
 }
 
 beforeAll(commonBeforeAll);
@@ -163,6 +181,7 @@ describe("GET /users", function () {
                     lastName: "U1L",
                     email: "user1@user.com",
                     isAdmin: false,
+                    jobs: [expect.any(Number), expect.any(Number)],
                 },
                 {
                     username: "u2",
@@ -170,6 +189,7 @@ describe("GET /users", function () {
                     lastName: "U2L",
                     email: "user2@user.com",
                     isAdmin: false,
+                    jobs: [],
                 },
                 {
                     username: "u3",
@@ -177,6 +197,7 @@ describe("GET /users", function () {
                     lastName: "U3L",
                     email: "user3@user.com",
                     isAdmin: false,
+                    jobs: [],
                 },
             ],
         });
@@ -216,6 +237,7 @@ describe("GET /users/:username", function () {
                 lastName: "U1L",
                 email: "user1@user.com",
                 isAdmin: false,
+                jobs: [expect.any(Number), expect.any(Number)],
             },
         });
     });
@@ -229,6 +251,23 @@ describe("GET /users/:username", function () {
                 lastName: "U1L",
                 email: "user1@user.com",
                 isAdmin: false,
+                jobs: [expect.any(Number), expect.any(Number)],
+            },
+        });
+    });
+
+    test("works for user without jobs", async function () {
+        const resp = await request(app)
+            .get(`/users/u2`)
+            .set("authorization", `Bearer ${adminToken}`);
+        expect(resp.body).toEqual({
+            user: {
+                username: "u2",
+                firstName: "U2F",
+                lastName: "U2L",
+                email: "user2@user.com",
+                isAdmin: false,
+                jobs: [],
             },
         });
     });
@@ -410,14 +449,10 @@ describe("DELETE /users/:username", function () {
 
 describe("POST /users/:username/jobs/:id ", function () {
     test("works for admins: create job application", async function () {
-        const job = await getJob();
-        const jobId = job.id;
-        console.log("jobId:", jobId);
+        const jobId = await newJobId();
         const resp = await request(app)
             .post(`/users/u1/jobs/${jobId}`)
             .set("authorization", `Bearer ${adminToken}`);
-
-        console.log(resp.body);
 
         expect(resp.statusCode).toEqual(201);
         expect(resp.body).toEqual({
@@ -426,8 +461,7 @@ describe("POST /users/:username/jobs/:id ", function () {
     });
 
     test("works for same user: create job application", async function () {
-        const job = await getJob();
-        const jobId = job.id;
+        const jobId = await newJobId();
         const resp = await request(app)
             .post(`/users/u1/jobs/${jobId}`)
             .set("authorization", `Bearer ${u1Token}`);
@@ -439,16 +473,14 @@ describe("POST /users/:username/jobs/:id ", function () {
     });
 
     test("unauth for anon", async function () {
-        const job = await getJob();
-        const jobId = job.id;
+        const jobId = await newJobId();
         const resp = await request(app).post(`/users/u1/jobs/${jobId}`);
 
         expect(resp.statusCode).toEqual(401);
     });
 
     test("unauth for different user", async function () {
-        const job = await getJob();
-        const jobId = job.id;
+        const jobId = await newJobId();
         const resp = await request(app)
             .post(`/users/u1/jobs/${jobId}`)
             .set("authorization", `Bearer ${u2Token}`);
@@ -457,22 +489,18 @@ describe("POST /users/:username/jobs/:id ", function () {
     });
 
     test("fails with duplicate job application", async function () {
-        const job = await getJob();
-        const jobId = job.id;
-        const resp1 = await request(app)
+        const jobId = await getJobId();
+
+        // u1 already applied to this job in testCommon
+        const resp = await request(app)
             .post(`/users/u1/jobs/${jobId}`)
             .set("authorization", `Bearer ${adminToken}`);
 
-        const resp2 = await request(app)
-            .post(`/users/u1/jobs/${jobId}`)
-            .set("authorization", `Bearer ${adminToken}`);
-
-        expect(resp2.statusCode).toEqual(400);
+        expect(resp.statusCode).toEqual(400);
     });
 
     test("fails with bad user", async function () {
-        const job = await getJob();
-        const jobId = job.id;
+        const jobId = await newJobId();
         const resp = await request(app)
             .post(`/users/badUsername/jobs/${jobId}`)
             .set("authorization", `Bearer ${adminToken}`);
