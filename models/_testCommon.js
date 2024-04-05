@@ -33,11 +33,20 @@ async function commonBeforeAll() {
         ]
     );
 
-    await db.query(`
+    const jobs = await db.query(`
       INSERT INTO jobs(company_handle, title, salary, equity)
       VALUES ('c1', 'T1', 10000, 0.2),
              ('c2', 'T2', 20000, 0)
       RETURNING id`);
+
+    await db.query(
+        `
+      INSERT INTO applications (username, job_id)
+      VALUES ('u1', $1),
+             ('u1', $2)
+      RETURNING username, job_id`,
+        [jobs.rows[0].id, jobs.rows[1].id]
+    );
 }
 
 async function commonBeforeEach() {

@@ -113,6 +113,7 @@ describe("findAll", function () {
                 lastName: "U1L",
                 email: "u1@email.com",
                 isAdmin: false,
+                jobs: [expect.any(Number), expect.any(Number)],
             },
             {
                 username: "u2",
@@ -120,6 +121,7 @@ describe("findAll", function () {
                 lastName: "U2L",
                 email: "u2@email.com",
                 isAdmin: false,
+                jobs: [],
             },
         ]);
     });
@@ -128,7 +130,7 @@ describe("findAll", function () {
 /************************************** get */
 
 describe("get", function () {
-    test("works", async function () {
+    test("works for user with jobs", async function () {
         let user = await User.get("u1");
         expect(user).toEqual({
             username: "u1",
@@ -136,6 +138,19 @@ describe("get", function () {
             lastName: "U1L",
             email: "u1@email.com",
             isAdmin: false,
+            jobs: [expect.any(Number), expect.any(Number)],
+        });
+    });
+
+    test("works for user without jobs", async function () {
+        let user = await User.get("u2");
+        expect(user).toEqual({
+            username: "u2",
+            firstName: "U2F",
+            lastName: "U2L",
+            email: "u2@email.com",
+            isAdmin: false,
+            jobs: [],
         });
     });
 
@@ -244,8 +259,11 @@ describe("remove", function () {
 
 describe("create job application", function () {
     test("works", async function () {
-        // get job id
-        const job = await db.query("SELECT id FROM jobs WHERE title='T1'");
+        // get job id of new job
+        const job = await db.query(`
+          INSERT INTO jobs(company_handle, title, salary, equity)
+          VALUES ('c1', 'T3', 10000, 0.2)
+          RETURNING id`);
         const jobId = job.rows[0].id;
 
         let application = await User.createJobApplication("u1", jobId);
