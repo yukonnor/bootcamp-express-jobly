@@ -201,6 +201,45 @@ class User {
 
         if (!user) throw new NotFoundError(`No user: ${username}`);
     }
+
+    /** Given a username and a job id, create a job application for a user
+     *
+     *  Returns { applied: jobID }
+     *
+     *  If user or job doesn't exist, throws NotFoundError.
+     *
+     *  If user already applied to job, throws custom BadRequestError.
+     */
+
+    static async applyToJob(username, jobId) {
+        const duplicateCheck = await db.query(
+            `SELECT username, job_id as "jobId"
+             FROM applications
+             WHERE username = $1
+             AND   job_id = $2`,
+            [username, jobId]
+        );
+
+        if (duplicateCheck.rows[0]) {
+            throw new BadRequestError(`User ${username} already has application for job ${jobId}.`);
+        }
+
+        const applicationRes = await db.query(
+            `INSERT INTO applications (username, job_id)
+             VALUES ($1, $2, $3, $4, $5, $6)
+             RETURNING job_id as applied`,
+            [username, jobId]
+        );
+
+        const applied = applicationRes.rows[0];
+
+        if (!applied)
+            throw new NotFoundError(
+                `Create application failed. No user ${username} or no job ${jobId}.`
+            );
+
+        return applied;
+    }
 }
 
 module.exports = User;
