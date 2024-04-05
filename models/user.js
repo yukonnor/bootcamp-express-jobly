@@ -3,7 +3,12 @@
 const db = require("../db");
 const bcrypt = require("bcrypt");
 const { sqlForPartialUpdate } = require("../helpers/sql");
-const { NotFoundError, BadRequestError, UnauthorizedError } = require("../expressError");
+const {
+    NotFoundError,
+    BadRequestError,
+    UnauthorizedError,
+    ExpressError,
+} = require("../expressError");
 
 const { BCRYPT_WORK_FACTOR } = require("../config.js");
 
@@ -211,34 +216,44 @@ class User {
      *  If user already applied to job, throws custom BadRequestError.
      */
 
-    static async applyToJob(username, jobId) {
-        const duplicateCheck = await db.query(
-            `SELECT username, job_id as "jobId"
-             FROM applications
-             WHERE username = $1
-             AND   job_id = $2`,
-            [username, jobId]
-        );
+    static async createJobApplication(username, jobId) {
+        // Note: Utilizing multiple queries here to provide more helpful error messages.
+        // If efficiency is more important, remove userCheck & jobCheck queries and rely on SQL error.
 
-        if (duplicateCheck.rows[0]) {
-            throw new BadRequestError(`User ${username} already has application for job ${jobId}.`);
+        // Check if the username exists
+        const userCheck = await db.query(`SELECT username FROM users WHERE username = $1`, [
+            username,
+        ]);
+
+        if (userCheck.rows.length === 0) {
+            throw new BadRequestError(`User ${username} does not exist.`);
         }
 
-        const applicationRes = await db.query(
-            `INSERT INTO applications (username, job_id)
-             VALUES ($1, $2, $3, $4, $5, $6)
-             RETURNING job_id as applied`,
-            [username, jobId]
-        );
+        // Check if the job_id exists
+        const jobCheck = await db.query(`SELECT id FROM jobs WHERE id = $1`, [jobId]);
 
-        const applied = applicationRes.rows[0];
+        if (jobCheck.rows.length === 0) {
+            throw new BadRequestError(`Job with ID ${jobId} does not exist.`);
+        }
 
-        if (!applied)
-            throw new NotFoundError(
-                `Create application failed. No user ${username} or no job ${jobId}.`
+        try {
+            const applicationRes = await db.query(
+                `INSERT INTO applications (username, job_id)
+                 VALUES ($1, $2)
+                 RETURNING job_id as applied`,
+                [username, jobId]
             );
 
-        return applied;
+            const applied = applicationRes.rows[0];
+            console.log("applied:", applied);
+            return applied;
+        } catch (err) {
+            // throw error with more helpful message for duplicate application
+            if (err.code === "23505")
+                throw new BadRequestError(
+                    `User ${username} already has application for job ${jobId}.`
+                );
+        }
     }
 }
 
