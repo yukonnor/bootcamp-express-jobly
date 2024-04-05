@@ -106,7 +106,7 @@ describe("GET /jobs", function () {
                 },
                 {
                     id: expect.any(Number),
-                    companyHandle: "c2",
+                    companyHandle: "c1",
                     title: "T2",
                     salary: 20000,
                     equity: "0",
@@ -129,7 +129,7 @@ describe("GET /jobs", function () {
                 },
                 {
                     id: expect.any(Number),
-                    companyHandle: "c2",
+                    companyHandle: "c1",
                     title: "T2",
                     salary: 20000,
                     equity: "0",
@@ -145,7 +145,7 @@ describe("GET /jobs", function () {
             jobs: [
                 {
                     id: expect.any(Number),
-                    companyHandle: "c2",
+                    companyHandle: "c1",
                     title: "T2",
                     salary: 20000,
                     equity: "0",
@@ -185,7 +185,7 @@ describe("GET /jobs", function () {
                 },
                 {
                     id: expect.any(Number),
-                    companyHandle: "c2",
+                    companyHandle: "c1",
                     title: "T2",
                     salary: 20000,
                     equity: "0",
@@ -202,7 +202,7 @@ describe("GET /jobs", function () {
             jobs: [
                 {
                     id: expect.any(Number),
-                    companyHandle: "c2",
+                    companyHandle: "c1",
                     title: "T2",
                     salary: 20000,
                     equity: "0",

@@ -137,7 +137,6 @@ describe("ensureAdminOrSameUser", function () {
     });
 
     test("unauth if no login", function () {
-        console.log("TEST: unauth if no login");
         expect.assertions(1);
         const req = { params: { username: "test" } };
         const res = { locals: {} };

@@ -224,8 +224,6 @@ describe("update", function () {
         const id = await getJobId("c1");
         let job = await Job.update(id, updateData);
 
-        console.log("job from test:", job);
-
         expect(job).toEqual({
             id: id,
             companyHandle: "c1",
