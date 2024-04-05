@@ -149,9 +149,13 @@ class User {
      *
      * Throws NotFoundError if not found.
      *
-     * WARNING: this function can set a new password or make a user an admin.
-     * Callers of this function must be certain they have validated inputs to this
-     * or a serious security risks are opened.
+     * WARNING: this function can set a new password.Callers of this function
+     * must be certain they have validated inputs to this or a serious security
+     * risks are opened.
+     *
+     * NOTE: this route that calls this method does not currently allow updates
+     * to isAdmin. To handle in future, create a admin-only route that supports
+     * making using admins / removing admin status.
      */
 
     static async update(username, data) {

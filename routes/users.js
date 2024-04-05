@@ -81,6 +81,9 @@ router.get("/:username", ensureAdminOrSameUser, async function (req, res, next) 
  *
  * Returns { username, firstName, lastName, email, isAdmin }
  *
+ * Note: This route does not support updates to isAdmin. To handle in future,
+ * create a separate admin-only route.
+ *
  * Authorization required: admin or same user
  **/
 
