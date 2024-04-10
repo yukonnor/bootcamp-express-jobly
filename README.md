@@ -11,14 +11,22 @@ This API-based app allows users to view companies, jobs at those companies and a
 -   All users can view compananies and jobs and create job applications.
 -   Users can edit their own user account.
 
+**To setup and seed dbs:**
+    
+    npm seed
+    
 **To run the app:**
 
-    node server.js
+    npm start 
+
+alternatively: `npm dev` which launches using nodemon.
 
 **To run the tests:**
 
-    jest -i
+    npm test
+
+Runs tests using `jest -i`.
 
 **To use app with Postman:**
 
-Download the Postman collection: [text](Jobly.postman_collection.json)
+Download and import the Postman collection found in root directory: `Jobly.postman_collection.json`
