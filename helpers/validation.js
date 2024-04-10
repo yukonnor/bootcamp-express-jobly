@@ -1,6 +1,6 @@
 const { BadRequestError, ExpressError } = require("../expressError");
 
-/** returns true or false based on whether the the object only contains keys that are defined in the allowedAttr list.
+/** objectIsValid() returns true or false based on whether the the object only contains keys that are defined in the allowedAttr list.
  *  obj: An object with key/value pairs.
  *  allowedAttr: An array of strings noting the keys that are allowed in the object
  *
@@ -10,6 +10,14 @@ const { BadRequestError, ExpressError } = require("../expressError");
 function objectIsValid(obj, allowedAttr) {
     return Object.keys(obj).every((key) => allowedAttr.includes(key));
 }
+
+/** convertStringToBool() returns a boolean datatype (true or false) based
+ *  on the provided string.
+ *
+ *  "true" returns true
+ *  "false" returns false
+ *   All other strings / arguments will throw an ExppressErr error.
+ */
 
 function convertStringToBool(string) {
     let value;

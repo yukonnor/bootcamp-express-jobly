@@ -74,7 +74,7 @@ function sqlForVariableWhere(filters) {
         }
     }
 
-    // will be empty string "" if no filters provided.
+    // concat where statements into a string, separated by " AND "
     const whereStatement = "WHERE ".concat(whereStatements.join(" AND "));
 
     return whereStatement;
